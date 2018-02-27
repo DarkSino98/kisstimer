@@ -1,0 +1,6 @@
+* text=auto
+COPYING text
+librarie.properties text
+*.h text
+*.cpp text
+*.txt text
