@@ -151,7 +151,7 @@ void run_timer(volatile struct timer_state *state)
 					state->timed_events_list[i].last_run);
 
 		if (delta >= state->timed_events_list[i].period) {
-			state->timed_events_list[i].isr();
+			state->timed_events_list[i].isr(state);
 			/*
 			 * We add period and not the current micros() value to
 			 * keep timed_events synchronized.

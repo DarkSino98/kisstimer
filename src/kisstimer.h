@@ -34,7 +34,7 @@
 #define MINUTES(x) SECONDS((x) * 60UL)
 
 struct timed_event {
-	void (*isr)(void);
+	void (*isr)(volatile struct timer_state *state);
 	unsigned long period; /* In microseconds */
 	unsigned long last_run;/* Can be initialiazed to anything */
 };
