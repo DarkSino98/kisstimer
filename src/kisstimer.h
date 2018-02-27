@@ -41,6 +41,7 @@ struct timed_event {
 
 struct timer_state {
 	bool enabled;
+	bool is_running;
 	unsigned int list_length;
 	struct timed_event *timed_events_list;
 #ifdef KT_STATIC_SIZE
@@ -79,5 +80,7 @@ void enable_timer(volatile struct timer_state *state);
 void disable_timer(volatile struct timer_state *state);
 
 void run_timer(volatile struct timer_state *state);
+void run_timer_loop(volatile struct timer_state *state);
+void run_timer_loop_infinite(volatile struct timer_state *state);
 
 #endif /* KISSTIMER_H */

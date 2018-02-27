@@ -31,6 +31,7 @@ void enable_timer(volatile struct timer_state *state)
 void disable_timer(volatile struct timer_state *state)
 {
 	state->enabled = false;
+	state->is_running = false;
 }
 
 #ifdef KT_STATIC_SIZE
@@ -136,25 +137,39 @@ static unsigned long compute_micros_delta(unsigned long last_micros)
 
 void run_timer(volatile struct timer_state *state)
 {
-	unsigned long start_time = micros();
+	if (!state->is_running) {
+		unsigned long start_time = micros();
 
-	for (unsigned int i = 0; i < state->list_length; i++)
-		state->timed_events_list[i].last_run = start_time;
+		for (unsigned int i = 0; i < state->list_length; i++)
+			state->timed_events_list[i].last_run = start_time;
 
-	while (state->enabled) {
-		for (unsigned int i = 0; i < state->list_length; i++) {
-			unsigned long delta = compute_micros_delta(
+		state->is_running = true;
+	}
+
+	for (unsigned int i = 0; i < state->list_length; i++) {
+		unsigned long delta = compute_micros_delta(
 					state->timed_events_list[i].last_run);
 
-			if (delta >= state->timed_events_list[i].period) {
-				state->timed_events_list[i].isr();
-				/*
-				 * We add period and not the current micros()
-				 * value to keep timed_event synchronized
-				 */
-				state->timed_events_list[i].last_run +=
+		if (delta >= state->timed_events_list[i].period) {
+			state->timed_events_list[i].isr();
+			/*
+			 * We add period and not the current micros() value to
+			 * keep timed_events synchronized.
+			 */
+			state->timed_events_list[i].last_run +=
 					state->timed_events_list[i].period;
-			}
 		}
 	}
+}
+
+void run_timer_loop(volatile struct timer_state *state)
+{
+	while (state->enabled)
+		run_timer(state);
+}
+
+void run_timer_loop_infinite(volatile struct timer_state *state)
+{
+	while (true)
+		run_timer(state);
 }
