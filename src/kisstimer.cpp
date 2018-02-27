@@ -124,6 +124,12 @@ int remove_timed_event(volatile struct timer_state *state,
 	return 1;
 }
 
+int remove_current_timed_event(volatile struct timer_state *state)
+{
+	return remove_timed_event_index(state, state->current_event_index);
+}
+
+
 static unsigned long compute_micros_delta(unsigned long last_micros)
 {
 	unsigned long current_micros = micros();
@@ -151,6 +157,7 @@ void run_timer(volatile struct timer_state *state)
 					state->timed_events_list[i].last_run);
 
 		if (delta >= state->timed_events_list[i].period) {
+			state->current_event_index = i;
 			state->timed_events_list[i].isr(state);
 			/*
 			 * We add period and not the current micros() value to

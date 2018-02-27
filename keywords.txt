@@ -3,6 +3,7 @@ enable_timer	KEYWORD2
 disable_timer	KEYWORD2
 add_timed_event	KEYWORD2
 remove_timed_event	KEYWORD2
+remove_current_timed_event	KEYWORD2
 run_timer	KEYWORD2
 run_timer_loop	KEYWORD2
 run_timer_loop_infinite	KEYWORD2
