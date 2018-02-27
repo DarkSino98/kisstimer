@@ -23,6 +23,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+/* CONFIGURATION */
+
+//#define KT_STATIC_SIZE 10
+
+/* END CONFIGURATION */
+
 #define MILLISECONDS(x) ((x) * 1000UL)
 #define SECONDS(x) MILLISECONDS((x) * 1000UL)
 #define MINUTES(x) SECONDS((x) * 60UL)
@@ -34,20 +40,43 @@ struct timed_event {
 };
 
 struct timer_state {
-	struct timed_event *timed_events_list;
-	unsigned int list_length;
 	bool enabled;
+	unsigned int list_length;
+	struct timed_event *timed_events_list;
+#ifdef KT_STATIC_SIZE
+	struct timed_event list_storage[KT_STATIC_SIZE];
+#endif
 };
 
-void initialize_timer(volatile struct timer_state *state);
+#ifdef KT_STATIC_SIZE
+
+#define initialize_timer(...) initialize_static_timer(__VA_ARGS__)
+#define add_timed_event(...) add_static_timed_event(__VA_ARGS__)
+#define remove_timed_event(...) remove_static_timed_event(__VA_ARGS__)
+
+void initialize_static_timer(volatile struct timer_state *state);
+
+int add_static_timed_event(volatile struct timer_state *state,
+						struct timed_event event);
+int remove_static_timed_event(volatile struct timer_state *state,
+						struct timed_event event);
+
+#else /* ifndef KT_STATIC_SIZE */
+
+#define initialize_timer(...) initialize_malloc_timer(__VA_ARGS__)
+#define add_timed_event(...) add_malloc_timed_event(__VA_ARGS__)
+#define remove_timed_event(...) remove_malloc_timed_event(__VA_ARGS__)
+
+void initialize_malloc_timer(volatile struct timer_state *state);
+
+int add_malloc_timed_event(volatile struct timer_state *state,
+						struct timed_event event);
+int remove_malloc_timed_event(volatile struct timer_state *state,
+						struct timed_event event);
+#endif /* ifndef KT_STATIC_SIZE */
 
 void enable_timer(volatile struct timer_state *state);
 void disable_timer(volatile struct timer_state *state);
-
-int add_timed_event(volatile struct timer_state *state,
-						struct timed_event event);
-int remove_timed_event(volatile struct timer_state *state,
-						struct timed_event event);
 
 void run_timer(volatile struct timer_state *state);
 
