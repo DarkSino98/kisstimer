@@ -44,9 +44,10 @@ struct timer_state {
 	bool is_running;
 	unsigned int current_event_index;
 	unsigned int list_length;
-	struct timed_event *timed_events_list;
 #ifdef KT_STATIC_SIZE
-	struct timed_event list_storage[KT_STATIC_SIZE];
+	struct timed_event timed_events_list[KT_STATIC_SIZE];
+#else
+	struct timed_event *timed_events_list;
 #endif
 };
 

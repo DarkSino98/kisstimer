@@ -34,13 +34,24 @@ void disable_timer(volatile struct timer_state *state)
 	state->is_running = false;
 }
 
+static volatile void *memcpy_volatile(volatile void *s1,
+				const volatile void *s2, size_t n)
+{
+	volatile unsigned char *s1_bytes = s1;
+	const volatile unsigned char *s2_bytes = s2;
+
+	for (size_t i = 0; i < n; i++)
+		s1_bytes[i] = s2_bytes[i];
+
+	return s1;
+}
+
 #ifdef KT_STATIC_SIZE
 
 void initialize_static_timer(volatile struct timer_state *state)
 {
 	state->enabled = false;
 	state->list_length = 0;
-	state->timed_events_list = state->list_storage;
 }
 
 int add_static_timed_event(volatile struct timer_state *state,
@@ -49,15 +60,19 @@ int add_static_timed_event(volatile struct timer_state *state,
 	if (state->list_length == KT_STATIC_SIZE)
 		return -1;
 
-	state->timed_events_list[state->list_length++] = event;
+	memcpy_volatile(&state->timed_events_list[state->list_length++],
+					&event, sizeof(struct timed_event));
 	return 0;
 }
 
 static int remove_timed_event_index(volatile struct timer_state *state,
 							unsigned int index)
 {
-	for (unsigned int i = index; i < state->list_length - 1; i++)
-		state->timed_events_list[i] = state->timed_events_list[i + 1];
+	for (unsigned int i = index; i < state->list_length - 1; i++) {
+		memcpy_volatile(&state->timed_events_list[i],
+					&state->timed_events_list[i + 1],
+						sizeof(struct timed_event));
+	}
 
 	state->list_length--;
 	return 0;
@@ -82,7 +97,8 @@ int add_malloc_timed_event(volatile struct timer_state *state,
 		return -1;
 
 	state->timed_events_list = new_list;
-	state->timed_events_list[state->list_length++] = event;
+	memcpy_volatile(&state->timed_events_list[state->list_length++],
+					&event, sizeof(struct timed_event));
 
 	return 0;
 }
@@ -102,10 +118,14 @@ static int remove_timed_event_index(volatile struct timer_state *state,
 	state->timed_events_list = new_list;
 	state->list_length--;
 
-	for (unsigned int i = index; i < state->list_length - 1; i++)
-		state->timed_events_list[i] = state->timed_events_list[i + 1];
+	for (unsigned int i = index; i < state->list_length - 1; i++) {
+		memcpy_volatile(&state->timed_events_list[i],
+					&state->timed_events_list[i + 1],
+						sizeof(struct timed_event));
+	}
 
-	state->timed_events_list[state->list_length - 1] = event_save;
+	memcpy(&state->timed_events_list[state->list_length - 1],
+				&event_save, sizeof(struct timed_event));
 	
 	return 0;
 }
