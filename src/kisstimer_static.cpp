@@ -17,9 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "kisstimer.h"
+
 #ifdef KT_STATIC_SIZE
 
-#include "kisstimer.h"
 #include "include/events_list_impl.h"
 
 void initialize_static_timer(volatile struct timer_state *state)
@@ -31,7 +32,7 @@ void initialize_static_timer(volatile struct timer_state *state)
 int realloc_timed_events_list(volatile struct timer_state *state,
 						unsigned int new_length)
 {
-	return state->new_length == 0 && state->list_length == KT_STATIC_SIZE;
+	return new_length == 0 && state->list_length == KT_STATIC_SIZE;
 }
 
 #endif

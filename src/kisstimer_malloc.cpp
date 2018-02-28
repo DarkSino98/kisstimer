@@ -17,9 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "kisstimer.h"
+
 #ifndef KT_STATIC_SIZE
 
-#include "kisstimer.h"
 #include "include/events_list_impl.h"
 #include <stdlib.h>
 
