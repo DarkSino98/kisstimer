@@ -54,28 +54,10 @@ void initialize_static_timer(volatile struct timer_state *state)
 	state->list_length = 0;
 }
 
-int add_static_timed_event(volatile struct timer_state *state,
-						struct timed_event event)
+static int realloc_timed_events_list(volatile struct timer_state *state,
+						unsigned int new_length)
 {
-	if (state->list_length == KT_STATIC_SIZE)
-		return -1;
-
-	memcpy_volatile(&state->timed_events_list[state->list_length++],
-					&event, sizeof(struct timed_event));
-	return 0;
-}
-
-static int remove_timed_event_index(volatile struct timer_state *state,
-							unsigned int index)
-{
-	for (unsigned int i = index; i < state->list_length - 1; i++) {
-		memcpy_volatile(&state->timed_events_list[i],
-					&state->timed_events_list[i + 1],
-						sizeof(struct timed_event));
-	}
-
-	state->list_length--;
-	return 0;
+	return state->new_length == 0 && state->list_length == KT_STATIC_SIZE;
 }
 
 #else /* ifndef KT_STATIC_SIZE */
@@ -87,19 +69,29 @@ void initialize_malloc_timer(volatile struct timer_state *state)
 	state->enabled = false;
 }
 
-int add_malloc_timed_event(volatile struct timer_state *state,
-						struct timed_event event)
+static int realloc_timed_events_list(volatile struct timer_state *state,
+						unsigned int new_length)
 {
 	struct timed_event *new_list = realloc(state->timed_events_list,
-			(state->list_length + 1) * sizeof(struct timed_event));
+			new_length * sizeof(struct timed_event));
 
 	if (new_list == NULL)
 		return -1;
 
 	state->timed_events_list = new_list;
+	return 0;
+}
+
+#endif /* ifndef KT_STATIC_SIZE */
+
+int add_timed_event(volatile struct timer_state *state,
+						struct timed_event event)
+{
+	if (realloc_timed_events_list(state, state->list_length + 1) != 0)
+		return -1;
+
 	memcpy_volatile(&state->timed_events_list[state->list_length++],
 					&event, sizeof(struct timed_event));
-
 	return 0;
 }
 
@@ -112,19 +104,12 @@ static int remove_timed_event_index(volatile struct timer_state *state,
 						sizeof(struct timed_event));
 	}
 
-	struct timed_event *new_list = realloc(state->timed_events_list,
-			(state->list_length - 1) * sizeof(struct timed_event));
-
-	if (new_list == NULL)
+	if (realloc_timed_events_list(state, state->list_length - 1) != 0)
 		return 1;
-
-	state->timed_events_list = new_list;
 
 	state->list_length--;
 	return 0;
 }
-
-#endif /* ifndef KT_STATIC_SIZE */
 
 int remove_timed_event(volatile struct timer_state *state,
 						struct timed_event event)

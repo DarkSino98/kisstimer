@@ -53,24 +53,17 @@ struct timer_state {
 #ifdef KT_STATIC_SIZE
 
 #define initialize_timer(...) initialize_static_timer(__VA_ARGS__)
-#define add_timed_event(...) add_static_timed_event(__VA_ARGS__)
-
 void initialize_static_timer(volatile struct timer_state *state);
-
-int add_static_timed_event(volatile struct timer_state *state,
-						struct timed_event event);
 
 #else /* ifndef KT_STATIC_SIZE */
 
 #define initialize_timer(...) initialize_malloc_timer(__VA_ARGS__)
-#define add_timed_event(...) add_malloc_timed_event(__VA_ARGS__)
-
 void initialize_malloc_timer(volatile struct timer_state *state);
 
-int add_malloc_timed_event(volatile struct timer_state *state,
-						struct timed_event event);
 #endif /* ifndef KT_STATIC_SIZE */
 
+int add_timed_event(volatile struct timer_state *state,
+						struct timed_event event);
 int remove_timed_event(volatile struct timer_state *state,
 						struct timed_event event);
 
