@@ -24,18 +24,18 @@
 #include <limits.h>
 #include "Arduino.h"
 
-void enable_timer(volatile struct timer_state *state)
+void enable_timer(VOLATILE struct timer_state *state)
 {
 	state->enabled = true;
 }
 
-void disable_timer(volatile struct timer_state *state)
+void disable_timer(VOLATILE struct timer_state *state)
 {
 	state->enabled = false;
 	state->is_running = false;
 }
 
-int add_timed_event(volatile struct timer_state *state,
+int add_timed_event(VOLATILE struct timer_state *state,
 						struct timed_event event)
 {
 	if (realloc_timed_events_list(state, state->list_length + 1) != 0)
@@ -45,7 +45,7 @@ int add_timed_event(volatile struct timer_state *state,
 					&event, sizeof(struct timed_event));
 	return 0;
 }
-int schedule_timed_event(volatile struct timer_state *state,
+int schedule_timed_event(VOLATILE struct timer_state *state,
 				struct timed_event event, unsigned long time)
 {
 	if (!state->is_running)
@@ -60,7 +60,7 @@ int schedule_timed_event(volatile struct timer_state *state,
 		return 0;
 }
 
-static int remove_timed_event_index(volatile struct timer_state *state,
+static int remove_timed_event_index(VOLATILE struct timer_state *state,
 							unsigned int index)
 {
 	for (unsigned int i = index; i < state->list_length - 1; i++) {
@@ -76,7 +76,7 @@ static int remove_timed_event_index(volatile struct timer_state *state,
 	return 0;
 }
 
-int remove_timed_event(volatile struct timer_state *state,
+int remove_timed_event(VOLATILE struct timer_state *state,
 						struct timed_event event)
 {
 	for (unsigned int i = 0; i < state->list_length; i++) {
@@ -99,7 +99,7 @@ static unsigned long compute_micros_delta(unsigned long last_micros)
 		return current_micros - last_micros;
 }
 
-static bool execute_event(volatile struct timer_state *state,
+static bool execute_event(VOLATILE struct timer_state *state,
 						unsigned int event_index)
 {
 	struct timed_event event = state->timed_events_list[event_index];
@@ -119,7 +119,7 @@ static bool execute_event(volatile struct timer_state *state,
 	return false;
 }
 
-void run_timer(volatile struct timer_state *state)
+void run_timer(VOLATILE struct timer_state *state)
 {
 	if (!state->is_running) {
 		unsigned long start_time = micros();
@@ -141,13 +141,13 @@ void run_timer(volatile struct timer_state *state)
 	}
 }
 
-void run_timer_loop(volatile struct timer_state *state)
+void run_timer_loop(VOLATILE struct timer_state *state)
 {
 	while (state->enabled)
 		run_timer(state);
 }
 
-void run_timer_loop_infinite(volatile struct timer_state *state)
+void run_timer_loop_infinite(VOLATILE struct timer_state *state)
 {
 	while (true)
 		run_timer(state);

@@ -20,9 +20,10 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "kisstimer.h"
 #include <stddef.h>
 
-volatile void *memcpy_volatile(volatile void *s1,
-					const volatile void *s2, size_t n);
+VOLATILE void *memcpy_volatile(VOLATILE void *s1,
+					const VOLATILE void *s2, size_t n);
 
 #endif

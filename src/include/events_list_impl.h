@@ -22,7 +22,7 @@
 
 #include "kisstimer.h"
 
-int realloc_timed_events_list(volatile struct timer_state *state,
+int realloc_timed_events_list(VOLATILE struct timer_state *state,
 						unsigned int new_length);
 
 #endif

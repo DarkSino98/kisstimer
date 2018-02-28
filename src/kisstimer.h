@@ -26,15 +26,22 @@
 /* CONFIGURATION */
 
 //#define KT_STATIC_SIZE 10
+//#define KT_VOLATILE_STATE
 
 /* END CONFIGURATION */
+
+#ifdef KT_VOLATILE_STATE
+	#define VOLATILE volatile
+#else
+	#define VOLATILE
+#endif
 
 #define MILLISECONDS(x) ((x) * 1000UL)
 #define SECONDS(x) MILLISECONDS((x) * 1000UL)
 #define MINUTES(x) SECONDS((x) * 60UL)
 
 struct timed_event {
-	bool (*isr)(volatile struct timer_state *state, volatile void *arg);
+	bool (*isr)(VOLATILE struct timer_state *state, volatile void *arg);
 	unsigned long period; /* In microseconds */
 	volatile void *isr_arg;
 	unsigned long last_run;/* Can be initialiazed to anything */
@@ -54,27 +61,27 @@ struct timer_state {
 #ifdef KT_STATIC_SIZE
 
 #define initialize_timer(...) initialize_static_timer(__VA_ARGS__)
-void initialize_static_timer(volatile struct timer_state *state);
+void initialize_static_timer(VOLATILE struct timer_state *state);
 
 #else /* ifndef KT_STATIC_SIZE */
 
 #define initialize_timer(...) initialize_malloc_timer(__VA_ARGS__)
-void initialize_malloc_timer(volatile struct timer_state *state);
+void initialize_malloc_timer(VOLATILE struct timer_state *state);
 
 #endif /* ifndef KT_STATIC_SIZE */
 
-int add_timed_event(volatile struct timer_state *state,
+int add_timed_event(VOLATILE struct timer_state *state,
 						struct timed_event event);
-int remove_timed_event(volatile struct timer_state *state,
+int remove_timed_event(VOLATILE struct timer_state *state,
 						struct timed_event event);
-int schedule_timed_event(volatile struct timer_state *state,
+int schedule_timed_event(VOLATILE struct timer_state *state,
 				struct timed_event event, unsigned long time);
 
-void enable_timer(volatile struct timer_state *state);
-void disable_timer(volatile struct timer_state *state);
+void enable_timer(VOLATILE struct timer_state *state);
+void disable_timer(VOLATILE struct timer_state *state);
 
-void run_timer(volatile struct timer_state *state);
-void run_timer_loop(volatile struct timer_state *state);
-void run_timer_loop_infinite(volatile struct timer_state *state);
+void run_timer(VOLATILE struct timer_state *state);
+void run_timer_loop(VOLATILE struct timer_state *state);
+void run_timer_loop_infinite(VOLATILE struct timer_state *state);
 
 #endif /* KISSTIMER_H */

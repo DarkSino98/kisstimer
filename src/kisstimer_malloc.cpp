@@ -24,14 +24,14 @@
 #include "include/events_list_impl.h"
 #include <stdlib.h>
 
-void initialize_malloc_timer(volatile struct timer_state *state)
+void initialize_malloc_timer(VOLATILE struct timer_state *state)
 {
 	state->timed_events_list = NULL;
 	state->list_length = 0;
 	state->enabled = false;
 }
 
-int realloc_timed_events_list(volatile struct timer_state *state,
+int realloc_timed_events_list(VOLATILE struct timer_state *state,
 						unsigned int new_length)
 {
 	struct timed_event *new_list = realloc(state->timed_events_list,

@@ -18,13 +18,14 @@
  */
 
 #include "include/utils.h"
+#include "kisstimer.h"
 #include <stddef.h>
 
-volatile void *memcpy_volatile(volatile void *s1,
-					const volatile void *s2, size_t n)
+VOLATILE void *memcpy_volatile(VOLATILE void *s1,
+					const VOLATILE void *s2, size_t n)
 {
-	volatile unsigned char *s1_bytes = s1;
-	const volatile unsigned char *s2_bytes = s2;
+	VOLATILE unsigned char *s1_bytes = s1;
+	const VOLATILE unsigned char *s2_bytes = s2;
 
 	for (size_t i = 0; i < n; i++)
 		s1_bytes[i] = s2_bytes[i];
