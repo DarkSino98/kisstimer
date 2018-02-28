@@ -34,7 +34,7 @@
 #define MINUTES(x) SECONDS((x) * 60UL)
 
 struct timed_event {
-	void (*isr)(volatile struct timer_state *state);
+	bool (*isr)(volatile struct timer_state *state);
 	unsigned long period; /* In microseconds */
 	unsigned long last_run;/* Can be initialiazed to anything */
 };
@@ -42,7 +42,6 @@ struct timed_event {
 struct timer_state {
 	bool enabled;
 	bool is_running;
-	unsigned int current_event_index;
 	unsigned int list_length;
 #ifdef KT_STATIC_SIZE
 	struct timed_event timed_events_list[KT_STATIC_SIZE];
@@ -77,9 +76,6 @@ int remove_timed_event(volatile struct timer_state *state,
 
 void enable_timer(volatile struct timer_state *state);
 void disable_timer(volatile struct timer_state *state);
-
-/* Meant to be called inside an ISR */
-int remove_current_timed_event(volatile struct timer_state *state);
 
 void run_timer(volatile struct timer_state *state);
 void run_timer_loop(volatile struct timer_state *state);

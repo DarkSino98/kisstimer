@@ -144,12 +144,6 @@ int remove_timed_event(volatile struct timer_state *state,
 	return 1;
 }
 
-int remove_current_timed_event(volatile struct timer_state *state)
-{
-	return remove_timed_event_index(state, state->current_event_index);
-}
-
-
 static unsigned long compute_micros_delta(unsigned long last_micros)
 {
 	unsigned long current_micros = micros();
@@ -159,6 +153,24 @@ static unsigned long compute_micros_delta(unsigned long last_micros)
 		return (ULONG_MAX - last_micros) + current_micros + 1;
 	else
 		return current_micros - last_micros;
+}
+
+static bool execute_event(volatile struct timer_state *state,
+						unsigned int event_index)
+{
+	if (!state->timed_events_list[event_index].isr(state)) {
+		if (remove_timed_event_index(state, event_index) == 0)
+			return true;
+	}
+
+	/*
+	 * We add the period and not the current micros() value to keep
+	 * the timed_events synchronized.
+	 */
+	state->timed_events_list[event_index].last_run +=
+				state->timed_events_list[event_index].period;
+
+	return false;
 }
 
 void run_timer(volatile struct timer_state *state)
@@ -177,14 +189,8 @@ void run_timer(volatile struct timer_state *state)
 					state->timed_events_list[i].last_run);
 
 		if (delta >= state->timed_events_list[i].period) {
-			state->current_event_index = i;
-			state->timed_events_list[i].isr(state);
-			/*
-			 * We add period and not the current micros() value to
-			 * keep timed_events synchronized.
-			 */
-			state->timed_events_list[i].last_run +=
-					state->timed_events_list[i].period;
+			if (execute_event(state, i))
+				i--;
 		}
 	}
 }
