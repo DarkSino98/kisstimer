@@ -45,6 +45,20 @@ int add_timed_event(volatile struct timer_state *state,
 					&event, sizeof(struct timed_event));
 	return 0;
 }
+int schedule_timed_event(volatile struct timer_state *state,
+				struct timed_event event, unsigned long time)
+{
+	if (!state->is_running)
+		return -1;
+
+	event.last_run = micros();
+	event.period = time;
+
+	if (add_timed_event(state, event) != 0)
+		return -2;
+	else
+		return 0;
+}
 
 static int remove_timed_event_index(volatile struct timer_state *state,
 							unsigned int index)

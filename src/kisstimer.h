@@ -66,6 +66,8 @@ int add_timed_event(volatile struct timer_state *state,
 						struct timed_event event);
 int remove_timed_event(volatile struct timer_state *state,
 						struct timed_event event);
+int schedule_timed_event(volatile struct timer_state *state,
+				struct timed_event event, unsigned long time);
 
 void enable_timer(volatile struct timer_state *state);
 void disable_timer(volatile struct timer_state *state);
