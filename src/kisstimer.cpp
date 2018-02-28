@@ -18,8 +18,8 @@
  */
 
 #include "kisstimer.h"
+#include "include/events_list_impl.h"
 #include <limits.h>
-#include <stdlib.h>
 
 #include "Arduino.h"
 
@@ -45,44 +45,6 @@ static volatile void *memcpy_volatile(volatile void *s1,
 
 	return s1;
 }
-
-#ifdef KT_STATIC_SIZE
-
-void initialize_static_timer(volatile struct timer_state *state)
-{
-	state->enabled = false;
-	state->list_length = 0;
-}
-
-static int realloc_timed_events_list(volatile struct timer_state *state,
-						unsigned int new_length)
-{
-	return state->new_length == 0 && state->list_length == KT_STATIC_SIZE;
-}
-
-#else /* ifndef KT_STATIC_SIZE */
-
-void initialize_malloc_timer(volatile struct timer_state *state)
-{
-	state->timed_events_list = NULL;
-	state->list_length = 0;
-	state->enabled = false;
-}
-
-static int realloc_timed_events_list(volatile struct timer_state *state,
-						unsigned int new_length)
-{
-	struct timed_event *new_list = realloc(state->timed_events_list,
-			new_length * sizeof(struct timed_event));
-
-	if (new_list == NULL)
-		return -1;
-
-	state->timed_events_list = new_list;
-	return 0;
-}
-
-#endif /* ifndef KT_STATIC_SIZE */
 
 int add_timed_event(volatile struct timer_state *state,
 						struct timed_event event)
