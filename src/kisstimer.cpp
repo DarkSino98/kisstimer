@@ -106,27 +106,21 @@ int add_malloc_timed_event(volatile struct timer_state *state,
 static int remove_timed_event_index(volatile struct timer_state *state,
 							unsigned int index)
 {
-	struct timed_event event_save =
-			state->timed_events_list[state->list_length - 1];
-
-	struct timed_event *new_list = realloc(state->timed_events_list,
-			(state->list_length - 1) * sizeof(struct timed_event));
-
-	if (new_list == NULL)
-		return -1;
-
-	state->timed_events_list = new_list;
-	state->list_length--;
-
 	for (unsigned int i = index; i < state->list_length - 1; i++) {
 		memcpy_volatile(&state->timed_events_list[i],
 					&state->timed_events_list[i + 1],
 						sizeof(struct timed_event));
 	}
 
-	memcpy(&state->timed_events_list[state->list_length - 1],
-				&event_save, sizeof(struct timed_event));
-	
+	struct timed_event *new_list = realloc(state->timed_events_list,
+			(state->list_length - 1) * sizeof(struct timed_event));
+
+	if (new_list == NULL)
+		return 1;
+
+	state->timed_events_list = new_list;
+
+	state->list_length--;
 	return 0;
 }
 
