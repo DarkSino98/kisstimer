@@ -34,7 +34,7 @@ int realloc_timed_events_list(volatile struct timer_state *state,
 						unsigned int new_length)
 {
 	struct timed_event *new_list = realloc(state->timed_events_list,
-			new_length * sizeof(struct timed_event));
+				sizeof(struct timed_event [new_length]));
 
 	if (new_list == NULL)
 		return -1;
