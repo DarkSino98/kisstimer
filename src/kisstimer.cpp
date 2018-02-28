@@ -102,7 +102,9 @@ static unsigned long compute_micros_delta(unsigned long last_micros)
 static bool execute_event(volatile struct timer_state *state,
 						unsigned int event_index)
 {
-	if (!state->timed_events_list[event_index].isr(state)) {
+	struct timed_event event = state->timed_events_list[event_index];
+
+	if (!event.isr(state, event.isr_arg)) {
 		if (remove_timed_event_index(state, event_index) == 0)
 			return true;
 	}
