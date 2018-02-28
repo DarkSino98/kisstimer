@@ -19,8 +19,9 @@
 
 #include "kisstimer.h"
 #include "include/events_list_impl.h"
-#include <limits.h>
+#include "include/utils.h"
 
+#include <limits.h>
 #include "Arduino.h"
 
 void enable_timer(volatile struct timer_state *state)
@@ -32,18 +33,6 @@ void disable_timer(volatile struct timer_state *state)
 {
 	state->enabled = false;
 	state->is_running = false;
-}
-
-static volatile void *memcpy_volatile(volatile void *s1,
-				const volatile void *s2, size_t n)
-{
-	volatile unsigned char *s1_bytes = s1;
-	const volatile unsigned char *s2_bytes = s2;
-
-	for (size_t i = 0; i < n; i++)
-		s1_bytes[i] = s2_bytes[i];
-
-	return s1;
 }
 
 int add_timed_event(volatile struct timer_state *state,
